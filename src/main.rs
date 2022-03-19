@@ -1,9 +1,15 @@
 use learning_rust::references_and_borrowing::fn_borrowing;
+use learning_rust::tiait::{UserLogin, UserLoginInterFace};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
 fn main() {
+    let u=UserLogin{
+        name:"1".to_string(),
+        pwd:"2".to_string(),
+    };
+    println!("{}",u.verify());
     read_file();
     hashmap();
     string();
@@ -20,6 +26,8 @@ fn main() {
     println!("user {:?}", user);
     println!("pwd {}", user.pwd())
 }
+
+
 fn read_file() {
     let mut f = File::open("src/hello.txt").unwrap_or_else(|err|{
         panic!("{:?}", err)

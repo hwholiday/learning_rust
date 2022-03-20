@@ -10,6 +10,7 @@ fn main() {
         pwd:"2".to_string(),
     };
     println!("{}",u.verify());
+    println!("{}",u.verifyv2());
     read_file();
     hashmap();
     string();

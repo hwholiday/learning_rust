@@ -1,5 +1,8 @@
 pub trait UserLoginInterFace {
     fn verify(&self) -> bool;
+    fn verifyv2(&self)->String{
+        return "verifyv2".to_string()
+    }
 }
 
 pub struct UserLogin {

@@ -1,4 +1,6 @@
+pub mod test;
 pub mod tiait;
+
 pub mod references_and_borrowing {
     pub fn fn_borrowing() {
         super::borrowing()

@@ -1,3 +1,5 @@
+mod mybox;
+
 use std::{env, process};
 use minigrep::{Config,run};
 fn main() {
@@ -11,4 +13,3 @@ fn main() {
         process::exit(1);
     };
 }
-

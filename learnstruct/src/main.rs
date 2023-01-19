@@ -8,7 +8,6 @@ fn main() {
     println!("{}", login_succeed);
     user.set_name2("a".to_string());
     println!("{:?}", user);
-    in_array(&[1,2,3])
 }
 #[derive(Debug)]
 struct User {

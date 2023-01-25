@@ -1,3 +1,4 @@
+use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::io;
@@ -23,25 +24,38 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(flags: &[String]) -> Result<Config, &'static str> {
+    pub fn new(mut flags: env::Args) -> Result<Config, &'static str> {
         if flags.len() < 3 {
             return Err("not enough arguments");
         }
+        flags.next();
+        let query =  match flags.next(){
+            Some(v) =>v,
+            None=>  return Err("query is empty"),
+        };
+        let file_path =  match flags.next(){
+            Some(v) =>v,
+            None=>  return Err("file_path is empty"),
+        };
         Ok(Config {
-            query: flags[1].clone(),
-            file_path: flags[2].clone(),
+            query: query,
+            file_path: file_path,
         })
     }
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut result = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            result.push(line)
-        }
-    }
-    result
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
+    //  let mut result = Vec::new();
+    // for line in contents.lines() {
+    //    if line.contains(query) {
+    //       result.push(line)
+    //  }
+    // }
+    // result
 }
 
 #[cfg(test)]

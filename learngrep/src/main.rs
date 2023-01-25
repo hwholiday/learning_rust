@@ -7,8 +7,7 @@ use std::{env, process};
 fn main() {
     println!("learn grep");
     println!("{}", env::var("PATH").is_ok());
-    let flags: Vec<String> = env::args().collect();
-    let conf = Config::new(&flags).unwrap_or_else(|err| {
+    let conf = Config::new(env::args()).unwrap_or_else(|err| {
         eprintln!("Config {err}");
         process::exit(1);
     });
@@ -18,3 +17,4 @@ fn main() {
         process::exit(1);
     });
 }
+ 

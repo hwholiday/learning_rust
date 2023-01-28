@@ -13,27 +13,27 @@ fn main() {
 
 }
 
-fn fn_read_file() {
-    File::open(FILE_PATH).unwrap();
-}
+// fn fn_read_file() {
+//     File::open(FILE_PATH).unwrap();
+// }
 
-fn fn_read_file_v2() {
-    File::open(FILE_PATH).expect("not find file");
-}
+// fn fn_read_file_v2() {
+//     File::open(FILE_PATH).expect("not find file");
+// }
 
-fn fn_read_file_v3() {
-    let file_info_result = File::open(FILE_PATH);
-    let file_info = match file_info_result {
-        Ok(file) => file,
-        Err(error) => panic!("123 {}", error),
-    };
-}
+// fn fn_read_file_v3() {
+//     let file_info_result = File::open(FILE_PATH);
+//     let file_info = match file_info_result {
+//         Ok(file) => file,
+//         Err(error) => panic!("123 {}", error),
+//     };
+// }
 
-fn fn_read_file_v4() {
-    let file_info_result = File::open(FILE_PATH).unwrap_or_else(|error| {
-        panic!("unwrap_or_else {}", error);
-    });
-}
+// fn fn_read_file_v4() {
+//     let file_info_result = File::open(FILE_PATH).unwrap_or_else(|error| {
+//         panic!("unwrap_or_else {}", error);
+//     });
+// }
 
 fn test_read_file_by_path(){
    let file= match read_file_by_path(FILE_PATH){

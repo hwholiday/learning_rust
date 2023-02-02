@@ -1,10 +1,6 @@
 use bytes::{BufMut, BytesMut};
-use tracing::info;
 use std::io;
-use tokio::{
-    io::{AsyncWriteExt},
-    net::TcpStream,
-};
+use tokio::{io::AsyncWriteExt, net::TcpStream};
 
 #[tokio::main]
 async fn main() {
@@ -26,24 +22,17 @@ async fn main() {
         // 等待可读事件的发生
         read.readable().await.unwrap();
         let mut buffer = vec![];
-        // 即便readable()返回代表可读，但读取时仍然可能返回WouldBlock
         match read.try_read_buf(&mut buffer) {
-            Ok(0) => {
-                // 成功读取了n个字节的数据
-                info!("read end");
-                break;
-            }
-            Ok(_) => {
-                // 成功读取了n个字节的数据
-                println!("out: {:?}", String::from_utf8(buffer));
-                continue;
+            Ok(0) => break,
+            Ok(n) => {
+                println!("GOT = {} {:?} {:?}", n, String::from_utf8(buffer.clone()),buffer.len());
             }
             Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
                 continue;
             }
             Err(e) => {
-                info!("error {}",e);
-                break;
+                println!("e {:?}", e);
+                return;
             }
         }
     }

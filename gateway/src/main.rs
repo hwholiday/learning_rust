@@ -4,7 +4,6 @@ use tokio::{
     net::{TcpListener, TcpStream},
 };
 use tracing::info;
-
 #[tokio::main]
 async fn main() {
     setup();
@@ -26,7 +25,19 @@ async fn service() {
 async fn process(mut socket: TcpStream) {
     loop {
         let mut dst = [0u8; 8];
-        socket.read_exact(&mut dst).await.unwrap();
+        match socket.read_exact(&mut dst).await{
+            Ok(n) =>{
+                println!("input read_exact n {:?}", n);
+                if n == 0 {
+                    //peer socket is dead
+                    socket.shutdown().await.unwrap();
+                } 
+            },
+            Err(e) =>{
+                println!("input read_exact e {:?}", e);
+                return ;
+            }
+        };
         let len = u64::from_be_bytes(dst);
         let mut buffer = vec![0u8; len as usize];
         socket.read_exact(&mut buffer).await.unwrap();

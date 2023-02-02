@@ -1,6 +1,10 @@
+use bytes::{BufMut, BytesMut};
 use gateway::setup;
-use tokio::net::{TcpListener, TcpStream};
-use tracing::{error, info};
+use tokio::{
+    io::{AsyncReadExt, BufReader},
+    net::{TcpListener, TcpStream},
+};
+use tracing::info;
 
 #[tokio::main]
 async fn main() {
@@ -20,4 +24,14 @@ async fn service() {
     }
 }
 
-async fn process(socket: TcpStream) {}
+async fn process(mut socket: TcpStream) {
+    let mut dst = [0u8; 8];
+    socket.read_exact(&mut dst).await.unwrap();
+    println!("1 {:?}", dst);
+    let len = u64::from_be_bytes(dst);
+    println!("2 {:?}", len);
+    let mut buffer = vec![0u8; len as usize];
+    socket.read_exact(&mut buffer).await.unwrap();
+    println!("3 {:?}", &buffer);
+    println!("4 {:?}", String::from_utf8(buffer).unwrap());
+}

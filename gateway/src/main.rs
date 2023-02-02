@@ -1,7 +1,6 @@
-use bytes::{BufMut, BytesMut};
 use gateway::setup;
 use tokio::{
-    io::{AsyncReadExt, BufReader},
+    io::AsyncReadExt,
     net::{TcpListener, TcpStream},
 };
 use tracing::info;

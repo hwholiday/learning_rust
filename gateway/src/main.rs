@@ -1,6 +1,6 @@
 use gateway::setup;
 use tokio::{
-    io::AsyncReadExt,
+    io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
 };
 use tracing::info;
@@ -24,13 +24,18 @@ async fn service() {
 }
 
 async fn process(mut socket: TcpStream) {
-    let mut dst = [0u8; 8];
-    socket.read_exact(&mut dst).await.unwrap();
-    println!("1 {:?}", dst);
-    let len = u64::from_be_bytes(dst);
-    println!("2 {:?}", len);
-    let mut buffer = vec![0u8; len as usize];
-    socket.read_exact(&mut buffer).await.unwrap();
-    println!("3 {:?}", &buffer);
-    println!("4 {:?}", String::from_utf8(buffer).unwrap());
+    loop {
+        let mut dst = [0u8; 8];
+        socket.read_exact(&mut dst).await.unwrap();
+        let len = u64::from_be_bytes(dst);
+        let mut buffer = vec![0u8; len as usize];
+        socket.read_exact(&mut buffer).await.unwrap();
+        let input = String::from_utf8(buffer).unwrap();
+        println!("input {:?}", input.trim());
+        println!("out {:?}",format!("{}out", input.trim()));
+        socket
+            .write(format!("{}out", input.trim()).as_bytes())
+            .await
+            .unwrap();
+    }
 }

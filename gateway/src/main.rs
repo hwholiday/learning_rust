@@ -7,7 +7,7 @@ use tracing::info;
 #[tokio::main]
 async fn main() {
     setup();
-    info!("gateway");
+    info!("gateway service");
     service().await;
 }
 
@@ -23,8 +23,8 @@ async fn service() {
 }
 
 async fn process(mut socket: TcpStream) {
+    let mut dst = [0u8; 8];
     loop {
-        let mut dst = [0u8; 8];
         match socket.read_exact(&mut dst).await{
             Ok(n) =>{
                 println!("input read_exact n {:?}", n);

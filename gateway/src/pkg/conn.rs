@@ -38,15 +38,7 @@ impl Conn {
         let len = u64::from_be_bytes(dst);
         let mut buffer = vec![0u8; len as usize];
         self.stream.read_exact(&mut buffer).await.or(Err("read_exact failed".to_string()))?;
-        let  mut input = String::new();
-        match String::from_utf8(buffer){
-            Ok(v) => {
-                input.push_str(&v.to_string())
-            },
-            Err(e)=>{
-                return Err(e.to_string())
-            }
-        }
+        let  input =  String::from_utf8(buffer).or(Err("read_exact failed".to_string()))?;
         println!("input {:?}", &input.trim());
         println!("out {:?}", format!("{}out", &input.trim()));
         Ok(Some(input.clone().trim().to_string()))

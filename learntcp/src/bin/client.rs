@@ -4,7 +4,7 @@ use tokio::{io::AsyncWriteExt, net::TcpStream};
 
 #[tokio::main]
 async fn main() {
-    println!("gateway client");
+    println!("learntcp client");
     let socket = TcpStream::connect("0.0.0.0:8081").await.unwrap();
     let (read, mut write) = socket.into_split();
     tokio::spawn(async move {

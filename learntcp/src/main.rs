@@ -1,4 +1,4 @@
-use gateway::setup;
+use learntcp::setup;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
@@ -7,7 +7,7 @@ use tracing::info;
 #[tokio::main]
 async fn main() {
     setup();
-    info!("gateway service");
+    info!("learntcp service");
     service().await;
 }
 

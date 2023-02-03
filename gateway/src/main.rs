@@ -11,6 +11,7 @@ async fn main() {
     service().await;
 }
 
+
 async fn service() {
     let listener = TcpListener::bind("0.0.0.0:8081").await.unwrap();
     loop {
@@ -24,29 +25,38 @@ async fn service() {
 
 async fn process(mut socket: TcpStream) {
     let mut dst = [0u8; 8];
+    let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
     loop {
-        match socket.read_exact(&mut dst).await{
-            Ok(n) =>{
-                println!("input read_exact n {:?}", n);
-                if n == 0 {
-                    //peer socket is dead
-                    socket.shutdown().await.unwrap();
-                } 
-            },
-            Err(e) =>{
-                println!("input read_exact e {:?}", e);
-                return ;
+        tokio::select! {
+            req = socket.read_exact(&mut dst) =>{
+                match req{
+                    Ok(n) =>{
+                        println!("input read_exact n {:?}", n);
+                        if n == 0 {
+                            //peer socket is dead
+                            socket.shutdown().await.unwrap();
+                        } 
+                    },
+                    Err(e) =>{
+                        println!("input read_exact e {:?}", e);
+                        return ;
+                    }
+                };
+                let len = u64::from_be_bytes(dst);
+                let mut buffer = vec![0u8; len as usize];
+                socket.read_exact(&mut buffer).await.unwrap();
+                let input = String::from_utf8(buffer).unwrap();
+                println!("input {:?}", input.trim());
+                println!("out {:?}",format!("{}out", input.trim()));
+                socket
+                    .write(format!("{}out", input.trim()).as_bytes())
+                    .await
+                    .unwrap();
             }
-        };
-        let len = u64::from_be_bytes(dst);
-        let mut buffer = vec![0u8; len as usize];
-        socket.read_exact(&mut buffer).await.unwrap();
-        let input = String::from_utf8(buffer).unwrap();
-        println!("input {:?}", input.trim());
-        println!("out {:?}",format!("{}out", input.trim()));
-        socket
-            .write(format!("{}out", input.trim()).as_bytes())
-            .await
-            .unwrap();
+            _ = interval.tick() => {
+                println!("tick tick tick");
+            }
+        }
+       
     }
 }

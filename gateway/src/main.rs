@@ -1,4 +1,4 @@
-use gateway::{pkg::conn::Conn, setup};
+use gateway::{pkg::conn::Conn,pkg::conn::Messages, setup};
 use tokio::net::{TcpListener, TcpStream};
 use tracing::info;
 #[tokio::main]
@@ -24,21 +24,22 @@ async fn process(socket: TcpStream) {
     let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
     loop {
         tokio::select! {
-            req = conn.read_cmd()=>{
+            req = conn.read()=>{
                 match req {
-                    Ok(Some(v)) => {
-                        println!("v {}", v);
+                    Ok(Some(buf)) => {
+                        let mut  msg = Messages::new();
+                        msg.set_msg(buf);
+                        println!("conn read {}",msg.to_string());
                     },
                     Ok(None) => {
-                        println!("None");
-        
+                        println!("conn is close");
                     },
                     Err(e) => {
-                        println!("e {}", e);
+                        println!("conn {} failed", e);
+                        return;
                     }
                 }
             },
-
             _ = interval.tick() => {
                 println!("tick tick tick");
             }

@@ -1,4 +1,3 @@
-use std::{io};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -19,7 +18,7 @@ impl Conn {
             stream: socket,
         }
     }
-    
+
     pub async fn read_cmd(&mut self) -> Result<Option<String>, String> {
         let mut dst = [0u8; 8];
         match self.stream.read_exact(&mut dst).await {
@@ -27,20 +26,19 @@ impl Conn {
                 println!("input read_exact n {:?}", n);
                 if n == 0 {
                     //peer socket is dead
-                   let _ = self.stream.shutdown().await;
-                    return Err("connection reset by peer".to_string())
+                    let _ = self.stream.shutdown().await;
+                    return Err("connection reset by peer".to_string());
                 }
             }
-            Err(e) => {
-                return Err(e.to_string())
-            }
+            Err(e) => return Err(e.to_string()),
         };
         let len = u64::from_be_bytes(dst);
         let mut buffer = vec![0u8; len as usize];
-        self.stream.read_exact(&mut buffer).await.or(Err("read_exact failed".to_string()))?;
-        let  input =  String::from_utf8(buffer).or(Err("read_exact failed".to_string()))?;
-        println!("input {:?}", &input.trim());
-        println!("out {:?}", format!("{}out", &input.trim()));
+        self.stream
+            .read_exact(&mut buffer)
+            .await
+            .or(Err("read_exact failed".to_string()))?;
+        let input = String::from_utf8(buffer).or(Err("from_utf8 failed".to_string()))?;
         Ok(Some(input.clone().trim().to_string()))
     }
 }

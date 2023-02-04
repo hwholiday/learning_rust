@@ -21,18 +21,28 @@ async fn service() {
 
 async fn process(socket: TcpStream) {
     let mut conn = Conn::new(socket);
+    let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
     loop {
-        match conn.read_cmd().await {
-            Ok(Some(v)) => {
-                println!("v {}", v);
+        tokio::select! {
+            req = conn.read_cmd()=>{
+                match req {
+                    Ok(Some(v)) => {
+                        println!("v {}", v);
+                    },
+                    Ok(None) => {
+                        println!("None");
+        
+                    },
+                    Err(e) => {
+                        println!("e {}", e);
+                    }
+                }
             },
-            Ok(None) => {
-                println!("None");
 
-            },
-            Err(e) => {
-                println!("e {}", e);
+            _ = interval.tick() => {
+                println!("tick tick tick");
             }
         }
+        
     }
 }

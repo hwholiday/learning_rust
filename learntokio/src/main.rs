@@ -17,7 +17,6 @@ async fn main() {
         let result = t.await;
         println!("result {:?}", result);
         notify2.notify_one();
-        
     });
     notify.notified().await;
     println!("result1111 notified");

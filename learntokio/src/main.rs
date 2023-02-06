@@ -5,15 +5,22 @@ use std::task::Waker;
 use std::thread;
 use std::{pin::Pin, task::Context, task::Poll};
 use tokio::signal;
+use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() {
     println!("learn tokio");
-    tokio::spawn(async {
+    let notify = Arc::new(Notify::new());
+    let notify2 = notify.clone();
+    tokio::spawn(async move {
         let t = TestFuture::new();
         let result = t.await;
-        println!("result {:?}", result)
+        println!("result {:?}", result);
+        notify2.notify_one();
+        
     });
+    notify.notified().await;
+    println!("result1111 notified");
     match signal::ctrl_c().await {
         Ok(()) => {
             println!("service stop succeed")

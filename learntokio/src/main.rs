@@ -12,7 +12,7 @@ async fn main() {
     tokio::spawn(async {
         let t = TestFuture::new();
         let result = t.await;
-        println!("result {:?}",result)
+        println!("result {:?}", result)
     });
     match signal::ctrl_c().await {
         Ok(()) => {
@@ -23,6 +23,7 @@ async fn main() {
         }
     }
 }
+#[derive(Clone, Debug)]
 pub struct TestFuture {
     inner: i64,
     waker: Option<Arc<Mutex<Waker>>>,

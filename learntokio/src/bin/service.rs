@@ -14,7 +14,7 @@ async fn main() {
 }
 type Db = Arc<Mutex<HashMap<String, Bytes>>>;
 async fn service() {
-    let listener = TcpListener::bind("127.0.0.1:8081").await.unwrap();
+    let listener =  TcpListener::bind("127.0.0.1:8081").await.unwrap();
     let db = Arc::new(Mutex::new(HashMap::new()));
     loop {
         let (socket, socket_addr) = listener.accept().await.unwrap();

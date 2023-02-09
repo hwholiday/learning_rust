@@ -7,8 +7,8 @@ use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct Conn {
-    id: String,
-    stream: TcpStream,
+    pub id: String,
+    pub stream: TcpStream,
 }
 
 impl Conn {

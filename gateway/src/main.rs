@@ -1,16 +1,12 @@
-use std::{collections::HashMap, sync::Arc};
-
 use gateway::{pkg::conn::Conn, pkg::conn::Messages, setup};
 use tokio::{
     net::{TcpListener, TcpStream},
-    sync::Mutex,
 };
 use tracing::info;
 #[tokio::main]
 async fn main() {
     setup();
     info!("gateway service");
-
     service().await;
 }
 

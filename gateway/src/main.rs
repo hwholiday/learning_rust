@@ -1,7 +1,10 @@
-use gateway::{pkg::conn::Conn, pkg::conn::Messages, setup};
-use tokio::{
-    net::{TcpListener, TcpStream},
-};
+use std::sync::Arc;
+
+use gateway::pkg::conn::{Shared, FormatTcp, Peer, Messages};
+use gateway::setup;
+use tokio::net::{TcpListener, TcpStream};
+use tokio::sync::{Mutex};
+
 use tracing::info;
 #[tokio::main]
 async fn main() {
@@ -12,26 +15,30 @@ async fn main() {
 
 async fn service() {
     let listener = TcpListener::bind("0.0.0.0:8081").await.unwrap();
+    let state = Arc::new(Mutex::new(Shared::new()));
     loop {
         let (socket, socket_addr) = listener.accept().await.unwrap();
         info!("socket_addr {:?}", socket_addr);
+        let s = Arc::clone(&state);
         tokio::spawn(async move {
-            process(socket).await;
+            process(s, socket).await;
         });
     }
 }
 
-async fn process(socket: TcpStream) {
-    let mut conn = Conn::new(socket);
-    let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
+async fn process(state: Arc<Mutex<Shared>>, socket: TcpStream) {
+    let mut conn = Peer::new(state.clone(), FormatTcp::new(socket)).await;
+    let mut interval = tokio::time::interval(std::time::Duration::from_secs(30));
     loop {
         tokio::select! {
-            req = conn.read()=>{
+            req = conn.format_tcp.read()=>{
                 match req {
                     Ok(Some(buf)) => {
-                        let mut  msg = Messages::new();
+                        let mut msg = Messages::new();
                         msg.set_msg(buf);
-                        println!("conn read {}",msg.to_string());
+                        let mut state = state.lock().await;
+                        println!("conn read {}",&msg.to_string());
+                        state.broadcast_all(&msg.to_string()).await;
                     },
                     Ok(None) => {
                         println!("conn is close");
@@ -43,8 +50,14 @@ async fn process(socket: TcpStream) {
                 }
             },
             _ = interval.tick() => {
-                println!("tick tick tick");
+                println!("tick");
+            },
+            Some(msg) = conn.rx.recv()=>{
+                println!("msg =>  {}",&msg);
+                conn.format_tcp.write(&msg.to_string()).await;
+                
             }
         }
     }
 }
+

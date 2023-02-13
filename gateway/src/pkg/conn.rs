@@ -1,25 +1,46 @@
+use std::{collections::HashMap, sync::Arc};
+
 use bytes::BytesMut;
-use tokio::{
-    io::{self, AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
-};
+use tokio::{sync::{mpsc, Mutex}, net::TcpStream, io::{AsyncReadExt, AsyncWriteExt}};
 use uuid::Uuid;
 
-#[derive(Debug)]
-pub struct Conn {
-    pub id: String,
-    pub stream: TcpStream,
+pub type Tx = mpsc::UnboundedSender<String>;
+
+pub type Rx = mpsc::UnboundedReceiver<String>;
+
+pub struct Shared {
+    pub peers: HashMap<String, Tx>,
 }
 
-impl Conn {
-    pub fn new(socket: TcpStream) -> Conn {
-        let uuid = Uuid::new_v4();
-        Conn {
-            id: uuid.to_string(),
-            stream: socket,
+impl Shared {
+    pub fn new() -> Self {
+        Shared {
+            peers: HashMap::new(),
         }
     }
 
+    pub async fn single(&mut self, sender: String, message: &str) {
+        for peer in self.peers.iter_mut() {
+            if *peer.0 == sender {
+                let _ = peer.1.send(message.into());
+            }
+        }
+    }
+    pub async fn broadcast_all(&mut self, message: &str) {
+        for peer in self.peers.iter_mut() {
+                let _ = peer.1.send(message.into());
+        }
+    }
+}
+
+pub struct FormatTcp {
+    pub stream: TcpStream,
+}
+
+impl FormatTcp {
+    pub fn new(socket: TcpStream) -> FormatTcp {
+        FormatTcp { stream: socket }
+    }
     pub async fn read(&mut self) -> Result<Option<BytesMut>, String> {
         let mut dst = [0u8; 8];
         match self.stream.read_exact(&mut dst).await {
@@ -38,19 +59,38 @@ impl Conn {
             .or(Err("read_exact failed".to_string()))?;
         Ok(Some(buffer.clone()))
     }
-
-    pub async fn close(&mut self) -> io::Result<()> {
-        self.stream.shutdown().await
+    pub async fn write(&mut self,out:&str) {
+        let resp = out.as_bytes();
+        let _ = self.stream.write(resp).await;
     }
 }
 
-impl ToString for Conn {
+/// The state for each connected client.
+pub struct Peer {
+    pub format_tcp: FormatTcp,
+    pub id: String,
+    pub rx: Rx,
+}
+
+impl Peer {
+    pub async fn new(state: Arc<Mutex<Shared>>, format_tcp: FormatTcp) -> Peer {
+        let uuid = Uuid::new_v4();
+        let (tx, rx) = mpsc::unbounded_channel();
+        state.lock().await.peers.insert(uuid.to_string(), tx);
+        Peer {
+            id: uuid.to_string(),
+            format_tcp: format_tcp,
+            rx: rx,
+        }
+    }
+}
+
+impl ToString for Peer {
     fn to_string(&self) -> String {
         format!("[id:{}]", self.id,)
     }
 }
 
-#[derive(Clone, Debug)]
 pub struct Messages {
     msg: BytesMut,
     create_time: chrono::NaiveDateTime,

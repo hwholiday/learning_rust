@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
-use gateway::pkg::conn::{Shared, FormatTcp, Peer, Messages};
-use gateway::setup;
+use simplechat::pkg::conn::{Shared, FormatTcp, Peer, Messages};
+use simplechat::setup;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{Mutex};
 
@@ -9,7 +9,7 @@ use tracing::info;
 #[tokio::main]
 async fn main() {
     setup();
-    info!("gateway service");
+    info!("simplechat service");
     service().await;
 }
 

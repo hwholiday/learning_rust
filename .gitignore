@@ -75,3 +75,4 @@ Cargo.lock
 /target
 guessing_game/target
 first_world/target
+struct_user/target

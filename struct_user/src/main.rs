@@ -3,7 +3,9 @@ fn main() {
     println!("{:?}", user.active);
     println!("{:?}", user.verify_password("w"));
     user.disable();
-    println!("{:?}", user.verify_password("w"))
+    println!("{:?}", user.verify_password("w"));
+    println!("{:?}", user);
+    println!("{:?}", user.Man())
 }
 
 #[derive(Debug)]
@@ -12,6 +14,12 @@ struct User {
     pwd: String,
     age: u32,
     active: bool,
+    sex:Sex,
+}
+#[derive(Debug)]
+enum Sex{
+    Man(String),
+    Woman
 }
 
 impl User {
@@ -21,8 +29,10 @@ impl User {
             pwd,
             age: 12,
             active: false,
+            sex:Sex::Man(String::from("123"))
         };
         u.active = true;
+        u.sex=Sex::Woman;
         u
     }
     fn verify_password(&self, pwd: &str) -> bool {
@@ -37,5 +47,12 @@ impl User {
     }
     fn disable(&mut self) {
         self.active = false
+    }
+
+    fn Man(&self) ->bool{
+          match &self.sex{
+            Sex::Man(val) => true,
+            Sex::Woman  => false,
+        }
     }
 }

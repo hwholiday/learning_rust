@@ -5,7 +5,7 @@ fn main() {
     user.disable();
     println!("{:?}", user.verify_password("w"));
     println!("{:?}", user);
-    println!("{:?}", user.Man())
+    println!("{:?}", user.Woman())
 }
 
 #[derive(Debug)]
@@ -49,9 +49,9 @@ impl User {
         self.active = false
     }
 
-    fn Man(&self) ->bool{
+    fn Woman(&self) ->bool{
           match &self.sex{
-            Sex::Man(val) => true,
+            Sex::Man(val) => false,
             Sex::Woman  => false,
         }
     }
